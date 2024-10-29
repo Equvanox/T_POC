@@ -6,7 +6,7 @@
         <i class="fas fa-bars"></i>
       </div>
       <div class="logo">
-        <img src="@\assets\logo_dashboard.jpg" alt="Logo" />
+        <img src="@/assets/logo_dashboard.jpg" alt="Logo" />
       </div>
 
       <nav class="menu">
@@ -23,7 +23,7 @@
           <div style="margin-right: 13px;">
             <li><a href="#" title="Sage"><i class="fas fa-search"></i><span> Sage</span></a></li>
           </div>
-        <!-- Help Button -->
+          <!-- Help Button -->
           <div style="margin-right: 5px; margin-left: 915px;">
             <li><a href="#" title="Help"><i class="fas fa-life-ring"></i><span> Help</span></a></li>
           </div>
@@ -42,9 +42,9 @@
                 <span v-if="isSidebarOpen">General</span>
               </a>
               <!-- Submenu for General -->
-              <div class="submenu" v-if="showSubMenu && isSidebarOpen" ref="submenu"  @click.stop>
+              <div class="submenu" v-if="showSubMenu && isSidebarOpen" ref="submenu" @click.stop>
                 <ul>
-                  <li><a href="#" title="Summary"><i class="fas fa-clipboard"></i><span> Summary</span></a></li>
+                  <li><a href="#" title="Summary" @click="showHomeDashboard"><i class="fas fa-clipboard"></i><span> Summary</span></a></li>
                   <li><a href="#" title="Bookings Dashboard"><i class="fas fa-chart-bar"></i><span> Bookings Dashboard</span></a></li>
                 </ul>
               </div>
@@ -52,10 +52,9 @@
             <li>
               <a href="#" title="AdOps"><i class="fas fa-ad"></i> <span v-if="isSidebarOpen">AdOps</span></a>
             </li>
-            <li>
+            <li @click="showYieldChart">
               <a href="#" title="Yield"><i class="fas fa-balance-scale"></i> <span v-if="isSidebarOpen">Yield</span></a>
             </li>
-            <!-- New Items in Hamburger Menu -->
             <li><a href="#" title="Sales/Finance"><i class="fas fa-chart-pie"></i><span v-if="isSidebarOpen">Sales/Finance (Beta)</span></a></li>
             <li><a href="#" title="Planning"><i class="fas fa-project-diagram"></i><span v-if="isSidebarOpen">Planning (Beta)</span></a></li>
             <li><a href="#" title="Account Management"><i class="fas fa-users"></i><span v-if="isSidebarOpen">Account Management</span></a></li>
@@ -70,7 +69,8 @@
       <div id="embed-title">
         <h2>{{ heading }}</h2>
         <div id="embed-container">
-          <HomeDashboard :data="chartData" />
+          <!-- Conditionally render HomeDashboard or YieldChartGrid based on `currentComponent` -->
+          <component :is="currentComponent" :data="chartData" />
         </div>
       </div>
     </div>
@@ -80,14 +80,17 @@
 <script>
 import axios from 'axios';
 import HomeDashboard from './HomeDashboard.vue';
+import YieldChartGrid from './YieldChartGrid.vue';
+
 export default {
-  components: { HomeDashboard },
+  components: { HomeDashboard, YieldChartGrid },
   data() {
     return {
       showSubMenu: false,
-      isSidebarOpen: false, // Control sidebar visibility
+      isSidebarOpen: false,
       heading: 'General Summary',
       chartData: [],
+      currentComponent: 'HomeDashboard', // Default component
     };
   },
   methods: {
@@ -107,8 +110,13 @@ export default {
         this.showSubMenu = false;
       }
     },
-    toggleMenu() {
-      this.menuOpen = !this.menuOpen;
+    showYieldChart() {
+      this.heading = 'Yield Data';
+      this.currentComponent = 'YieldChartGrid'; // Switch component to YieldChartGrid
+    },
+    showHomeDashboard() {
+      this.heading = 'General Summary';
+      this.currentComponent = 'HomeDashboard'; // Switch component to HomeDashboard
     },
   },
   async mounted() {
@@ -120,12 +128,17 @@ export default {
     } catch (error) {
       console.error('Failed to fetch data', error);
     }
+    document.addEventListener('click', this.handleClickOutside);
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside);
   },
 };
 </script>
+
+<style>
+/* Your existing CSS styles */
+</style>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
@@ -220,11 +233,7 @@ body {
   white-space: nowrap;
 }
 
-.text,span {
-  padding-left: 10%;
-}
-
-.sidebar ul li ul {
+.submenu {
   position: absolute;
   left: 100%;
   top: 0;
@@ -232,14 +241,18 @@ body {
   padding: 10px;
   width: 210px;
   z-index: 1000;
-  display: block;
 }
 
-.sidebar ul li ul li {
+.submenu ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.submenu ul li {
   margin-bottom: 5px;
 }
 
-.sidebar ul li ul li a {
+.submenu ul li a {
   padding: 8px 10px;
   white-space: nowrap;
 }
@@ -270,6 +283,8 @@ html, body {
     padding: 10px;
     justify-content: center;
   }
+
+
   .sidebar ul li a i {
     margin-right: 0;
   }

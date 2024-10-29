@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/components/HomePage.vue';
 import LoginPage from '@/components/LoginPage.vue';
+import YieldChartGrid from '@/components/YieldChartGrid.vue'
 
 const routes = [
     {
@@ -12,6 +13,11 @@ const routes = [
       path: '/home',
       name: 'Home',
       component: HomePage
+    },
+    {
+      path: '/yield',
+      name: 'YieldChartGrid',
+      component: YieldChartGrid
     }
   ];
 
