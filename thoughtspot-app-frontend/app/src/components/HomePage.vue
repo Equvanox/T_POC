@@ -68,7 +68,7 @@
 
       <div id="embed-title">
         <h2>{{ heading }}</h2>
-        <div id="embed-container">
+        <div id="embed-container" class="scrollable-container">
           <!-- Conditionally render HomeDashboard or YieldChartGrid based on `currentComponent` -->
           <component :is="currentComponent" :data="chartData" />
         </div>
@@ -273,6 +273,12 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+}
+.scrollable-container {
+  max-height: 81.5vh; 
+  overflow-y: auto;  
+  padding: 10px;     
+  background-color: #f9f9f9;
 }
 
 @media (max-width: 768px) {
