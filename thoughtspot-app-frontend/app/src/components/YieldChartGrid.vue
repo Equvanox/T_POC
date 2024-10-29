@@ -5,7 +5,7 @@
     <div style="height: 400px; overflow-y: auto; margin-bottom: -120px; align:center;">
       <AgGridVue
         class="ag-theme-alpine"
-        style="width: 68%; height: 65%; margin:atuo;"
+        style="width: 100%; height: 70%; margin:atuo;"
         :columnDefs="columnDefs"
         :rowData="rowData"
         :gridOptions="gridOptions"
@@ -37,27 +37,31 @@ import 'ag-grid-enterprise';
 
 export default {
   components: { AgGridVue },
-  data() {
-    return {
-      columnDefs: [
-        { headerName: 'Campaign', field: 'campaign' },
-        { headerName: 'Inventory (%)', field: 'inventoryUsage' },
-        { headerName: 'Sell-Through Rate (%)', field: 'sellThroughRate' },
-        { headerName: 'Profit Margin (%)', field: 'profitMargin' },
-        { headerName: 'Revenue ($)', field: 'revenue' },
-        { headerName: 'Date', field: 'date' },
-      ],
-      rowData: [
-        { campaign: 'Campaign A', inventoryUsage: 80, sellThroughRate: 70, profitMargin: 25, revenue: 10000, date: '2024-01-01' },
-        { campaign: 'Campaign B', inventoryUsage: 60, sellThroughRate: 60, profitMargin: 30, revenue: 15000, date: '2024-02-01' },
-        { campaign: 'Campaign C', inventoryUsage: 90, sellThroughRate: 85, profitMargin: 20, revenue: 12000, date: '2024-03-01' },
-        { campaign: 'Campaign D', inventoryUsage: 70, sellThroughRate: 75, profitMargin: 28, revenue: 18000, date: '2024-04-01' },
-        { campaign: 'Campaign E', inventoryUsage: 65, sellThroughRate: 68, profitMargin: 27, revenue: 11000, date: '2024-05-01' },
-      ],
-      gridOptions: { enableCharts: true, enableRangeSelection: true },
-      gridApi: null,
-    };
-  },
+data() {
+  return {
+    columnDefs: [
+      { headerName: 'Campaign', field: 'campaign' },
+      { headerName: 'Inventory (%)', field: 'inventoryUsage' },
+      { headerName: 'Sell-Through Rate (%)', field: 'sellThroughRate' },
+      { headerName: 'Profit Margin (%)', field: 'profitMargin' },
+      { headerName: 'Revenue ($)', field: 'revenue' },
+      { headerName: 'Date', field: 'date' },
+      { headerName: 'Region', field: 'region' },     // New column for region
+      { headerName: 'Status', field: 'status' },     // New column for status
+      { headerName: 'Category', field: 'category' }  // Additional new column for category
+    ],
+    rowData: [
+      { campaign: 'Campaign A', inventoryUsage: 80, sellThroughRate: 70, profitMargin: 25, revenue: 10000, date: '2024-01-01', region: 'North', status: 'Active', category: 'Digital' },
+      { campaign: 'Campaign B', inventoryUsage: 60, sellThroughRate: 60, profitMargin: 30, revenue: 15000, date: '2024-02-01', region: 'East', status: 'Inactive', category: 'Print' },
+      { campaign: 'Campaign C', inventoryUsage: 90, sellThroughRate: 85, profitMargin: 20, revenue: 12000, date: '2024-03-01', region: 'South', status: 'Active', category: 'Outdoor' },
+      { campaign: 'Campaign D', inventoryUsage: 70, sellThroughRate: 75, profitMargin: 28, revenue: 18000, date: '2024-04-01', region: 'West', status: 'Pending', category: 'Digital' },
+      { campaign: 'Campaign E', inventoryUsage: 65, sellThroughRate: 68, profitMargin: 27, revenue: 11000, date: '2024-05-01', region: 'Central', status: 'Active', category: 'Radio' },
+    ],
+    gridOptions: { enableCharts: true, enableRangeSelection: true },
+    gridApi: null,
+  };
+},
+
   methods: {
     onFirstDataRendered(params) {
       this.gridApi = params.api;
