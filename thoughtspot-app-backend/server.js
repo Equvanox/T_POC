@@ -10,8 +10,6 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(dashboardRoutes);
 
-console.log("Reached Server");
-
 const users = [
     { username: 'MxAdmin', password: '1' },
     { username: 'r.tawase2@tegna.com', password: '1' }

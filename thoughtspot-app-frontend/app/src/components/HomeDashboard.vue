@@ -1,50 +1,109 @@
 <template>
-  <v-chart :options="chartOptions" style="width: 100%; height: 400px;" />
+  <div ref="chart" style="width: 1500px; height: 400px;"></div>
 </template>
 
 <script>
-import { defineComponent, reactive, watch } from 'vue';
-import VChart from 'vue-echarts';
-import * as echarts from 'echarts/core';
-import { TitleComponent, TooltipComponent, GridComponent } from 'echarts/components';
-import { BarChart } from 'echarts/charts';
-import { CanvasRenderer } from 'echarts/renderers';
+import * as echarts from 'echarts';
 
-echarts.use([TitleComponent, TooltipComponent, GridComponent, BarChart, CanvasRenderer]);
-
-export default defineComponent({
-  components: { VChart },
+export default {
+  name: 'SimpleChart',
   props: {
-    data: {
+    chartData: {
       type: Array,
-      required: true,
+      default: () => []
     },
+    chartType: {
+      type: String,
+      default: 'bar'
+    }
   },
-  setup(props) {
-    const chartOptions = reactive({
-      title: { text: 'Test Chart' },
-      tooltip: { trigger: 'axis', formatter: '{b} : {c}' },
-      xAxis: { type: 'category', data: [] },
-      yAxis: { type: 'value' },
-      series: [{ type: 'bar', data: [] }],
-    });
-
-    watch(
-      () => props.data,
-      (newData) => {
-        if (newData && newData.length > 0) {
-          chartOptions.xAxis.data = newData.map((item) => item.category);
-          chartOptions.series[0].data = newData.map((item) => item.value);
-          console.log()
+  mounted() {
+    this.initChart();
+  },
+  watch: {
+    chartData: {
+      handler(newData) {
+        if (this.myChart) {
+          this.updateChart(newData);
         }
       },
-      { immediate: true });
-
-    return { chartOptions };
+      deep: true,
+      immediate: true
+    },
+    chartType: {
+      handler() {
+        // Re-render the chart with the new type
+        this.updateChart(this.chartData);
+      },
+      immediate: true
+    }
   },
-});
+  methods: {
+    initChart() {
+      const chartDom = this.$refs.chart;
+      this.myChart = echarts.init(chartDom);
+      this.updateChart(this.chartData);
+
+      window.addEventListener('resize', this.myChart.resize);
+    },
+    updateChart(data) {
+      if (!this.myChart) return;
+
+      // Extract categories and values for bar and line charts
+      const categories = data.map(item => item.category);
+      const values = data.map(item => item.value);
+
+      let options;
+
+      if (this.chartType === 'pie') {
+        options = {
+          title: {
+            text: 'Spend by Advertisers',
+          },
+          tooltip: {
+            trigger: 'item',
+          },
+          series: [
+            {
+              type: 'pie',
+              data: data.map(item => ({ name: item.category, value: item.value })),
+            },
+          ],
+        };
+      } else {
+        // Default to bar/line types that use x/y axes
+        options = {
+          title: {
+            text: `Advertiser ${this.chartType.charAt(0).toUpperCase() + this.chartType.slice(1)} Details`,
+          },
+          tooltip: {},
+          xAxis: {
+            type: 'category',
+            data: categories,
+          },
+          yAxis: {
+            type: 'value',
+          },
+          series: [
+            {
+              type: this.chartType, // Dynamic series type (bar, line)
+              data: values,
+            },
+          ],
+        };
+      }
+
+      this.myChart.setOption(options);
+    }
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.myChart.resize);
+    if (this.myChart) {
+      this.myChart.dispose();
+    }
+  }
+};
 </script>
 
 <style>
-/* Add your styles here */
 </style>
