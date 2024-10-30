@@ -64,7 +64,7 @@ export default {
 
 .login-image {
   flex: 2;
-  background: url('D:\2024\learning\Vue.js\POC_TEGNA\T_POC\thoughtspot-app-frontend\app\src\assets\login_background.jpg') no-repeat center center;
+  background: url('D:\VisualStudioCode\BI Portal\POC\thoughtspot-app-frontend\app\src\assets\login_background.jpg') no-repeat center center;
   background-size: cover;
   /* clip-path: polygon(0 0, 75% 0, 65% 100%, 0% 100%); Creating the angled shape */
   position: relative;

@@ -72,7 +72,15 @@
                 </ul>
               </div>
             </li>
-            <li  @click="switchDashboard('Planning')" ><a href="#" title="Planning"><i class="fas fa-project-diagram"></i><span v-if="isSidebarOpen">Planning</span></a></li>
+            <li id='planning' class="menu-item" @click="toggleSubMenu('planning')" ref="planningMenuItem">
+            <a href="#" title="Planning"><i class="fas fa-project-diagram"></i><span v-if="isSidebarOpen">Planning (Tableau)</span></a>
+            <div class="submenu" v-if="showSubMenu.planning && isSidebarOpen" ref="planningsubmenu"  @click.stop>
+                <ul>
+                  <li @click="switchDashboard('Planning Summary')"><a href="#" title="Summary"><i class="fas fa-file"></i><span>Summary</span></a></li>
+                  <li @click="switchDashboard('Planning Strategy')"><a href="#" title="Planning Strategy"><i class="fas fa-brain"></i><span>Planning Strategy</span></a></li>
+                </ul>
+              </div>
+            </li>
             <li><a href="#" title="Account Management"><i class="fas fa-users"></i><span v-if="isSidebarOpen">Account Management</span></a></li>
             <li><a href="#" title="Product"><i class="fas fa-box"></i><span v-if="isSidebarOpen">Product</span></a></li>
             <li><a href="#" title="Executive"><i class="fas fa-user-tie"></i><span v-if="isSidebarOpen">Executive</span></a></li>
@@ -100,28 +108,16 @@
           <HomeDashboard :chartData="chartData" chartType="pie" />
         </div>
       </div>
-      <div id="embed-title" v-if="dashboardType === 'Planning'">
-  <h2>{{ heading }}</h2>
- <div class='tableauPlaceholder' id='viz1730293015763' style='position: relative'>
-   <noscript><a href='#'><img alt='OVERVIEW ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;HR&#47;HRDashboard_17194096809750&#47;OVERVIEW&#47;1_rss.png' style='border: none' /></a></noscript>
-   <object class='tableauViz'  style='display:none;'>
-      <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-      <param name='embed_code_version' value='3' />
-      <param name='site_root' value='' />
-      <param name='name' value='HRDashboard_17194096809750&#47;OVERVIEW' />
-      <param name='tabs' value='no' />
-      <param name='toolbar' value='yes' />
-      <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;HR&#47;HRDashboard_17194096809750&#47;OVERVIEW&#47;1.png' />
-      <param name='animate_transition' value='yes' />
-      <param name='display_static_image' value='yes' />
-      <param name='display_spinner' value='yes' />
-      <param name='display_overlay' value='yes' />
-      <param name='display_count' value='yes' />
-      <param name='language' value='en-US' />
-   </object>
-</div>
-</div>
-
+      <div id="embed-title" v-if="dashboardType === 'Planning Summary'">
+        <h2>{{ heading }}</h2>
+        <div id="embed-container" class="scrollable-container">
+          <PlanningSummary />
+        </div>
+      </div>
+      <div id="embed-title" v-if="dashboardType === 'Planning Strategy'">
+        <h2>{{ heading }}</h2>
+        <TableauEmbed/>
+      </div>
       <div class="iframecontainer" v-if="dashboardType === 'iframe'">
         <iframe class="responsive-iframe" title="Sample Report Demo" width="1140" height="541.25" src="https://playground.powerbi.com/sampleReportEmbed" frameborder="0" allowFullScreen="true"></iframe>
       </div>
@@ -134,11 +130,12 @@
 import axios from 'axios';
 import HomeDashboard from '@/components/HomeDashboard.vue';
 import YieldChartGrid from '@/components/YieldChartGrid.vue'
-import PlanningPage from '@/components/PlanningPage.vue';
+import TableauEmbed from "@/components/TableauBoard.vue";
+import PlanningSummary from '@/components/PlanningPage.vue';
 import { nextTick } from 'vue';
 import { init, Action, LiveboardEmbed, AuthType } from '@thoughtspot/visual-embed-sdk';
 export default {
-  components: { HomeDashboard, YieldChartGrid,PlanningPage  },
+  components: { HomeDashboard, YieldChartGrid, TableauEmbed, PlanningSummary},
   data() {
     return {
       showSubMenu: {
@@ -152,17 +149,7 @@ export default {
       liveboardId: 'ef5b2449-05c0-4dd9-9494-70d93946c377',
       heading: 'General Summary',
       chartData: [],
-      AchartData: [],
-       // Get the div and object elements
-     divElement : null,
-     vizElement : null,
-    
-   
-
-    // Create and insert the Tableau script
-     scriptElement : null
-  
-  
+      AchartData: []
     };
   },
   methods: {
@@ -195,21 +182,6 @@ export default {
       console.log(response.data);
       this.chartData = response.data;
     },
-     async showTableu(){
-            // Get the div and object elements
-    const divElement = this.$refs.vizContainer;
-    const vizElement = divElement.getElementsByTagName("object")[0];
-    
-    // Set the dimensions
-    vizElement.style.width = "1366px";
-    vizElement.style.height = "1047px";
-
-    // Create and insert the Tableau script
-    const scriptElement = document.createElement("script");
-    scriptElement.src = "https://public.tableau.com/javascripts/api/viz_v1.js";
-    vizElement.parentNode.insertBefore(scriptElement, vizElement);
-     
-     },
     switchDashboard(type) {
       this.activeDashboard = type;
       if (this.liveboardEmbed) {
@@ -233,11 +205,14 @@ export default {
         this.heading = type;
         this.showAGgrid();
       }
-      if (type === 'Planning') {
-        this.dashboardType = 'Planning';
-        this.heading = 'Planning Page';
-        this.showTableu();
-    }
+      if (type === 'Planning Summary') {
+        this.dashboardType = type;
+        this.heading = type;
+      }
+      if (type === 'Planning Strategy') {
+        this.dashboardType = type;
+        this.heading = type;
+      }
       if (type === 'Delivery Metrics') {
         this.heading = type;
         this.dashboardType = 'echart';
@@ -264,6 +239,7 @@ export default {
     document.addEventListener('click', (event) => this.handleClickOutside(event, 'finance'));
     document.addEventListener('click', (event) => this.handleClickOutside(event, 'yield'));
     document.addEventListener('click', (event) => this.handleClickOutside(event, 'adops'));
+    document.addEventListener('click', (event) => this.handleClickOutside(event, 'planning'));
     try {
       init({
         thoughtSpotHost: 'https://tegna.thoughtspot.cloud/', 
@@ -281,9 +257,6 @@ export default {
     if (this.activeDashboard === 'Delivery Metrics') {
       this.showEchart();
     }
-     if (this.activeDashboard === 'Planning') {
-       this.showTableu();
-    }
     } catch (error) {
       console.error('Failed to fetch data', error);
     }
@@ -293,6 +266,7 @@ export default {
     document.removeEventListener('click', (event) => this.handleClickOutside(event, 'finance'));
     document.removeEventListener('click', (event) => this.handleClickOutside(event, 'yield'));
     document.removeEventListener('click', (event) => this.handleClickOutside(event, 'adops'));
+    document.removeEventListener('click', (event) => this.handleClickOutside(event, 'planning'));
   },
 };
 </script>
@@ -480,5 +454,12 @@ html, body {
   overflow-y: auto;  
   padding: 10px;     
   background-color: #f9f9f9;
+}
+
+.tableauPlaceholder {
+  position: relative;
+  width: 100%;
+  height: 700px;
+  overflow-y: auto;
 }
 </style>
