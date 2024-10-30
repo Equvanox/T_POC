@@ -1,5 +1,4 @@
-<template>
-  <div class="dashboard-page screen">
+<div class="dashboard-page screen">
     <!-- Header with Menu -->
     <header class="header">
       <div class="hamburger-menu" @click="toggleSidebar">
@@ -96,21 +95,21 @@
       <div id="embed-title" v-if="dashboardType === 'AGgrid'">
         <h2>{{ heading }}</h2>
         <div id="embed-container" class="scrollable-container">
-          <component :is="currentComponent" :data="AchartData" />
+          <component :is="currentComponent" :data="AchartData"/>
         </div>
       </div>
       <div id="embed-title" v-if="dashboardType === 'echart'">
         <h2>{{ heading }}</h2>
         <div id="embed-container" class="scrollable-container">
-          <HomeDashboard :chartData="chartData" chartType="bar" />
-          <HomeDashboard :chartData="chartData" chartType="line" />
-          <HomeDashboard :chartData="chartData" chartType="pie" />
+          <div id="HomeDashboard" :chartData="chartData" chartType="bar"></div>
+          <div id="HomeDashboard" :chartData="chartData" chartType="line"></div>
+          <div id="HomeDashboard" :chartData="chartData" chartType="pie"></div>
         </div>
       </div>
       <div id="embed-title" v-if="dashboardType === 'Planning Strategy'">
         <h2>{{ heading }}</h2>
         <div id="embed-container" class="scrollable-container" style="padding-top: 0px;">
-          <PlanningSummary />
+          <div id="PlanningSummary"></div>
         </div>
       </div>
       <div class="iframecontainer" v-if="dashboardType === 'iframe'">
@@ -119,145 +118,3 @@
 
     </div>
   </div>
-</template>
-
-<script>
-import axios from 'axios';
-import { nextTick } from 'vue';
-import '@/styles/HomePageStyle.css';
-import HomeDashboard from '@/components/HomeDashboard.vue';
-import PlanningSummary from '@/components/PlanningPage.vue';
-import YieldChartGrid from '@/components/YieldChartGrid.vue';
-import { init, Action, LiveboardEmbed, AuthType } from '@thoughtspot/visual-embed-sdk';
-export default {
-  components: { HomeDashboard, YieldChartGrid, PlanningSummary},
-  data() {
-    return {
-      showSubMenu: {
-        general: false,
-        bookings: false,
-        sales: false
-      },
-      activeDashboard: null,
-      isSidebarOpen: false,
-      dashboardType : 'General Summary',
-      liveboardId: 'ef5b2449-05c0-4dd9-9494-70d93946c377',
-      heading: 'General Summary',
-      chartData: [],
-      AchartData: []
-    };
-  },
-  methods: {
-    toggleSubMenu(id) {
-      this.showSubMenu[id] = !this.showSubMenu[id];
-    },
-    toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen;
-    },
-    signOut() {
-      this.$router.push('/');
-    },
-    handleClickOutside(event, id) {
-      const menuItem = this.$refs[`${id}MenuItem`];
-      const submenu = this.$refs[`${id}Submenu`];
-      if (menuItem && submenu && !menuItem.contains(event.target) && !submenu.contains(event.target)) {
-        this.$set(this.showSubMenu, id, false);
-      }
-    },
-    toggleMenu() {
-      this.menuOpen = !this.menuOpen;
-    },
-    async showAGgrid() {
-      this.currentComponent = 'YieldChartGrid';
-    },
-    async showEchart() {
-      await nextTick();
-      console.log("Reached Vue");
-      const response = await axios.get('http://localhost:3000/api/dashboard-data');
-      console.log(response.data);
-      this.chartData = response.data;
-    },
-    switchDashboard(type) {
-      this.activeDashboard = type;
-      if (this.liveboardEmbed) {
-        this.liveboardEmbed.detach();
-        this.liveboardEmbed = null;
-      }
-      if (type === 'General Summary') {
-        this.dashboardType = type;
-        this.heading = type;
-        this.liveboardId = 'ef5b2449-05c0-4dd9-9494-70d93946c377';
-        this.renderLiveboard();
-      }
-      if (type === 'Bookings Dashboard') {
-        this.dashboardType = type;
-        this.heading = type;
-        this.liveboardId = '5a16fd22-3c8c-4889-b755-996256276bd8';
-        this.renderLiveboard();
-      }
-      if (type === 'Yield Summary') {
-        this.dashboardType = 'AGgrid';
-        this.heading = type;
-        this.showAGgrid();
-      }
-      if (type === 'Planning Strategy') {
-        this.dashboardType = type;
-        this.heading = type;
-      }
-      if (type === 'Delivery Metrics') {
-        this.heading = type;
-        this.dashboardType = 'echart';
-        this.showEchart();
-      }  
-      if (type === 'Premion Sales') {
-        this.dashboardType = 'iframe';
-      }  
-    },
-    async renderLiveboard() {
-      await nextTick();
-      const embed = new LiveboardEmbed('#embed-container', {
-        frameParams: {},
-        liveboardId: this.liveboardId,
-        hiddenActions: [Action.EditTML, Action.Schedule, Action.ExportTML, Action.UpdateTML,
-          Action.RenameModalTitleDescription, Action.MakeACopy, Action.LiveboardInfo, Action.Present, 
-          Action.SchedulesList, Action.Edit, Action.Share ,Action.CopyLink, Action.Pin, Action.Edit, Action.RenameModalTitleDescription,Action.Share,"requestVerification",Action.AddToFavorites],
-      });
-      embed.render();
-    }
-  },
-  async mounted() {
-    document.addEventListener('click', (event) => this.handleClickOutside(event, 'general'));
-    document.addEventListener('click', (event) => this.handleClickOutside(event, 'finance'));
-    document.addEventListener('click', (event) => this.handleClickOutside(event, 'yield'));
-    document.addEventListener('click', (event) => this.handleClickOutside(event, 'adops'));
-    document.addEventListener('click', (event) => this.handleClickOutside(event, 'planning'));
-    try {
-      init({
-        thoughtSpotHost: 'https://tegna.thoughtspot.cloud/', 
-        authType: AuthType.None,
-        getAuthToken: async () => {
-          return localStorage.getItem('token');
-        },
-      });
-    if (this.activeDashboard === 'General Summary' || this.activeDashboard === 'Bookings Dashboard' || this.activeDashboard === null) {
-      this.renderLiveboard();
-    }
-    if (this.activeDashboard === 'Yield Summary') {
-      this.showAGgrid();
-    }
-    if (this.activeDashboard === 'Delivery Metrics') {
-      this.showEchart();
-    }
-    } catch (error) {
-      console.error('Failed to fetch data', error);
-    }
-  },
-  beforeUnmount() {
-    document.removeEventListener('click', (event) => this.handleClickOutside(event, 'general'));
-    document.removeEventListener('click', (event) => this.handleClickOutside(event, 'finance'));
-    document.removeEventListener('click', (event) => this.handleClickOutside(event, 'yield'));
-    document.removeEventListener('click', (event) => this.handleClickOutside(event, 'adops'));
-    document.removeEventListener('click', (event) => this.handleClickOutside(event, 'planning'));
-  },
-};
-</script>

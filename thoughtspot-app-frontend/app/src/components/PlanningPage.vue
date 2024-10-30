@@ -7,7 +7,8 @@ export default {
   data() {
     return {
       tableauViz: null,
-      tableauUrl:"https://prod-apnortheast-a.online.tableau.com/t/govindatak-45a71db4fa/views/Plannig_Dashboard/Plannig_Dashboard?:origin=card_share_link&:embed=n" // Replace with your dashboard URL
+      // tableauUrl:"https://prod-apnortheast-a.online.tableau.com/t/govindatak-45a71db4fa/views/Plannig_Dashboard/Plannig_Dashboard?:origin=card_share_link&:embed=n",
+      tableauUrl:"https://public.tableau.com/shared/WTDHK26DC?:display_count=n&:origin=viz_share_link",
     };
   },
   mounted() {
