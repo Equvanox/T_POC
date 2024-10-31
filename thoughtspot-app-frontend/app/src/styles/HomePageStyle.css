@@ -187,6 +187,31 @@ html, body {
   }
 }
 
+.chart-container {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto;
+}
+
+.chart1, .chart2 {
+  grid-column: span 1;
+  width: 700px;
+  height: 420px;  
+}
+
+.chart3 {
+  grid-column: span 2;
+}
+
+/* Optional styling for visualization */
+.chart {
+  padding: 20px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+
 #embed-container {
   width: 100%;
   height: 81.5vh;

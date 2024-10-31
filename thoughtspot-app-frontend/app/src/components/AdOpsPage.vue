@@ -1,5 +1,5 @@
 <template>
-  <div ref="chart" style="width: 1500px; height: 400px;"></div>
+  <div ref="chart" style="width: 650px; height: 400px;"></div>
 </template>
 
 <script>
@@ -14,7 +14,7 @@ export default {
     },
     chartType: {
       type: String,
-      default: 'bar'
+      default: 'bar' // Options: 'bar', 'line', 'pie', 'bubble'
     }
   },
   mounted() {
@@ -32,7 +32,6 @@ export default {
     },
     chartType: {
       handler() {
-        // Re-render the chart with the new type
         this.updateChart(this.chartData);
       },
       immediate: true
@@ -49,7 +48,6 @@ export default {
     updateChart(data) {
       if (!this.myChart) return;
 
-      // Extract categories and values for bar and line charts
       const categories = data.map(item => item.category);
       const values = data.map(item => item.value);
 
@@ -57,39 +55,47 @@ export default {
 
       if (this.chartType === 'pie') {
         options = {
-          title: {
-            text: 'Spend by Advertisers',
-          },
-          tooltip: {
-            trigger: 'item',
-          },
+          title: { text: 'Spend by Advertisers' },
+          tooltip: { trigger: 'item' },
           series: [
             {
               type: 'pie',
-              data: data.map(item => ({ name: item.category, value: item.value })),
-            },
-          ],
+              data: data.map(item => ({ name: item.category, value: item.value }))
+            }
+          ]
         };
-      } else {
-        // Default to bar/line types that use x/y axes
+      } else if (this.chartType === 'bubble') {
+        // Bubble chart setup
         options = {
-          title: {
-            text: `Advertiser ${this.chartType.charAt(0).toUpperCase() + this.chartType.slice(1)} Details`,
-          },
-          tooltip: {},
-          xAxis: {
-            type: 'category',
-            data: categories,
-          },
-          yAxis: {
-            type: 'value',
-          },
+          title: { text: 'Impressions Scale' },
+          tooltip: { trigger: 'item' },
+          xAxis: { type: 'category', data: categories },
+          yAxis: { type: 'value' },
           series: [
             {
-              type: this.chartType, // Dynamic series type (bar, line)
-              data: values,
-            },
-          ],
+              type: 'scatter',
+              data: data.map(item => ({
+                name: item.category,
+                value: [item.category, item.value, item.size] // x-axis, y-axis, bubble size
+              })),
+              symbolSize: function (data) {
+                return data[2]; // Controls the bubble size based on the third value (size)
+              }
+            }
+          ]
+        };
+      } else {
+        options = {
+          title: { text: `Advertiser ${this.chartType.charAt(0).toUpperCase() + this.chartType.slice(1)} Details` },
+          tooltip: {},
+          xAxis: { type: 'category', data: categories },
+          yAxis: { type: 'value' },
+          series: [
+            {
+              type: this.chartType,
+              data: values
+            }
+          ]
         };
       }
 

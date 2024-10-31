@@ -102,15 +102,18 @@
       <div id="embed-title" v-if="dashboardType === 'echart'">
         <h2>{{ heading }}</h2>
         <div id="embed-container" class="scrollable-container">
-          <HomeDashboard :chartData="chartData" chartType="bar" />
-          <HomeDashboard :chartData="chartData" chartType="line" />
-          <HomeDashboard :chartData="chartData" chartType="pie" />
-        </div>
+          <div class="chart-container">
+            <AdOpsPage class="chart chart1" :chartData="chartData" chartType="bar" />
+            <AdOpsPage class="chart chart2" :chartData="chartData" chartType="line" />
+            <AdOpsPage class="chart chart1" :chartData="chartData" chartType="pie" />
+            <AdOpsPage class="chart chart2" :chartData="bubblechartData" chartType="bubble" />
+          </div>
+          </div>
       </div>
       <div id="embed-title" v-if="dashboardType === 'Planning Strategy'">
         <h2>{{ heading }}</h2>
         <div id="embed-container" class="scrollable-container" style="padding-top: 0px;">
-          <PlanningSummary />
+          <PlanningPage />
         </div>
       </div>
       <div class="iframecontainer" v-if="dashboardType === 'iframe'">
@@ -125,12 +128,12 @@
 import axios from 'axios';
 import { nextTick } from 'vue';
 import '@/styles/HomePageStyle.css';
-import HomeDashboard from '@/components/HomeDashboard.vue';
-import PlanningSummary from '@/components/PlanningPage.vue';
-import YieldChartGrid from '@/components/YieldChartGrid.vue';
+import AdOpsPage from '@/components/AdOpsPage.vue';
+import PlanningPage from '@/components/PlanningPage.vue';
+import YieldPage from '@/components/YieldPage.vue';
 import { init, Action, LiveboardEmbed, AuthType } from '@thoughtspot/visual-embed-sdk';
 export default {
-  components: { HomeDashboard, YieldChartGrid, PlanningSummary},
+  components: { AdOpsPage, YieldPage, PlanningPage},
   data() {
     return {
       showSubMenu: {
@@ -144,7 +147,8 @@ export default {
       liveboardId: 'ef5b2449-05c0-4dd9-9494-70d93946c377',
       heading: 'General Summary',
       chartData: [],
-      AchartData: []
+      AchartData: [],
+      bubblechartData: []
     };
   },
   methods: {
@@ -168,13 +172,20 @@ export default {
       this.menuOpen = !this.menuOpen;
     },
     async showAGgrid() {
-      this.currentComponent = 'YieldChartGrid';
+      this.currentComponent = 'YieldPage';
     },
     async showEchart() {
       await nextTick();
       console.log("Reached Vue");
       const response = await axios.get('http://localhost:3000/api/dashboard-data');
       console.log(response.data);
+      if (this.bubblechartData.length == 0) {
+        for (let i=0; i< response.data.length; i++) {
+          response.data[i]['size'] = response.data[i]['value']/18;
+          this.bubblechartData.push(response.data[i]);
+        }
+      }
+      console.log(this.bubblechartData)
       this.chartData = response.data;
     },
     switchDashboard(type) {
